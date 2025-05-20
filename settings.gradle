@@ -1,0 +1,13 @@
+rootProject.name = 'bank-app'
+
+include 'blockerApplication'
+include 'cashApplication'
+include 'configServerService'
+include 'eurekaServiceDiscovery'
+include 'exchangeApplication'
+include 'exchangeGeneratorApplication'
+include 'gatewayService'
+include 'notificationsApplication'
+include 'transferApplication'
+include 'bankUIApplication'
+include 'accountsApplication'
