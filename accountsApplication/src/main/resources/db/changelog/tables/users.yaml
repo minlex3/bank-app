@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaBank users notification
+      changes:
+        - createTable:
+            schemaName: account
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: login
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fio
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_of_birth
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: datetime_create
+                  type: timestamp
+                  constraints:
+                    nullable: false

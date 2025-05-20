@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-exchange-schema
+      changes:
+        - sql:
+            sql: "CREATE SCHEMA IF NOT EXISTS exchange;"
+      runAlways: false
+      runOnChange: false
+  - include:
+      file: db/changelog/tables/exchange.yaml

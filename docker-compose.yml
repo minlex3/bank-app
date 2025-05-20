@@ -1,192 +1,302 @@
-version: '3.8'
-
 services:
+  configserver:
+    build:
+      context: ./configServerService
+      dockerfile: Dockerfile
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
+    environment:
+      CONFIG_SERVER_PORT: ${CONFIG_SERVER_PORT}
+    networks:
+      - postgres_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${CONFIG_SERVER_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  eureka-service-discovery:
+    build:
+      context: ./eurekaServiceDiscovery
+      dockerfile: Dockerfile
+    ports:
+      - "${EUREKA_SERVER_PORT}:${EUREKA_SERVER_PORT}"
+    environment:
+      EUREKA_SERVER_PORT: ${EUREKA_SERVER_PORT}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:${EUREKA_SERVER_PORT}/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postgres_network
+
+  notifications-application:
+    build:
+      context: ./notificationsApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${NOTIFICATIONS_SERVER_PORT}:${NOTIFICATIONS_SERVER_PORT}"
+    environment:
+      DATASOURCE_URL: ${DATASOURCE_URL}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      NOTIFICATIONS_SERVER_PORT: ${NOTIFICATIONS_SERVER_PORT}
+      EUREKA_SERVER_PORT: ${EUREKA_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  accounts-application:
+    build:
+      context: ./accountsApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${ACCOUNTS_SERVER_PORT}:${ACCOUNTS_SERVER_PORT}"
+    environment:
+      DATASOURCE_URL: ${DATASOURCE_URL}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      ACCOUNTS_SERVER_PORT: ${ACCOUNTS_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  bank-ui-application:
+    build:
+      context: ./bankUIApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${BANK_UI_SERVER_PORT}:${BANK_UI_SERVER_PORT}"
+    environment:
+      BANK_UI_SERVER_PORT: ${BANK_UI_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  blocker-application:
+    build:
+      context: ./blockerApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${BLOCKER_SERVER_PORT}:${BLOCKER_SERVER_PORT}"
+    environment:
+      BLOCKER_SERVER_PORT: ${BLOCKER_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  exchange-application:
+    build:
+      context: ./exchangeApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${EXCHANGE_SERVER_PORT}:${EXCHANGE_SERVER_PORT}"
+    environment:
+      DATASOURCE_URL: ${DATASOURCE_URL}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      EXCHANGE_SERVER_PORT: ${EXCHANGE_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  exchange-generator-application:
+    build:
+      context: ./exchangeGeneratorApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${EXCHANGE_GENEGATOR_SERVER_PORT}:${EXCHANGE_GENEGATOR_SERVER_PORT}"
+    environment:
+      EXCHANGE_GENEGATOR_SERVER_PORT: ${EXCHANGE_GENEGATOR_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  cash-application:
+    build:
+      context: ./cashApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${CASH_SERVER_PORT}:${CASH_SERVER_PORT}"
+    environment:
+      CASH_SERVER_PORT: ${CASH_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  transfer-application:
+    build:
+      context: ./transferApplication
+      dockerfile: Dockerfile
+    ports:
+      - "${TRANSFER_SERVER_PORT}:${TRANSFER_SERVER_PORT}"
+    environment:
+      TRANSFER_SERVER_PORT: ${TRANSFER_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
+      KEYCLOAK_ISSUER_URL: ${KEYCLOAK_ISSUER_URL}
+      GATEWAY_SERVER_URL: ${GATEWAY_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  gateway-service:
+    build:
+      context: ./gatewayService
+      dockerfile: Dockerfile
+    ports:
+      - "${GATEWAY_SERVER_PORT}:${GATEWAY_SERVER_PORT}"
+    environment:
+      GATEWAY_SERVER_PORT: ${GATEWAY_SERVER_PORT}
+      EUREKA_ZONE: ${EUREKA_ZONE}
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL}
+    depends_on:
+      configserver:
+        condition: service_healthy
+      eureka-service-discovery:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+
+  postgres-db:
+    image: postgres
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
+      POSTGRES_DB: ${DATASOURCE_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - .pg-oper-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATASOURCE_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      postgres_network:
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - .redis_data:/data
+    networks:
+      - postgres_network
 
   keycloak:
-    build:
-      context: .
-      dockerfile: Dockerfile.keycloak
+    image: quay.io/keycloak/keycloak:22.0.1
     container_name: keycloak
-    command: [ "./bin/kc.sh", "start-dev", "--import-realm" ]
+    restart: unless-stopped
     environment:
-      KC_DB: dev-mem
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/realms/master"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
+      KC_HOSTNAME: localhost
+      KC_HTTP_ENABLED: "true"
     volumes:
-      - ./keycloak/realm-config:/opt/keycloak/data/import
+      - ./realm-config.json:/opt/keycloak/data/import/realm-config.json
     ports:
-      - "8080:8080"
+      - "8282:8080" # Порт Keycloak изменен на 8282
     networks:
-      - bank-network
-
-  eureka-server:
-    container_name: bank-eureka-server
-    build:
-      context: .
-      dockerfile: bank-eureka-server/Dockerfile
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-    ports:
-      - "8761:8761"
-    networks:
-      - bank-network
-
-  config-server:
-    container_name: bank-config-server
-    build:
-      context: .
-      dockerfile: bank-config-server/Dockerfile
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-    ports:
-      - "8888:8888"
-    depends_on:
-      - eureka-server
-    networks:
-      - bank-network
-
-  bank-gateway:
-    container_name: bank-gateway
-    build:
-      context: .
-      dockerfile: bank-gateway/Dockerfile
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_GATEWAY_CLIENT_SECRET}
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - bank-network
-
-  accounts-service:
-    container_name: bank-accounts
-    build:
-      context: .
-      dockerfile: bank-accounts/Dockerfile
-    ports:
-      - "8082:8081"
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - bank-network
-    environment:
-      SPRING_PROFILES_ACTIVE: default
-
-  auth-server:
-    container_name: bank-auth-server
-    build:
-      context: .
-      dockerfile: bank-auth-server/Dockerfile
-    ports:
-      - "9000:9000"
-    environment:
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    networks:
-      - bank-network
-
-  bank-front-ui:
-    container_name: bank-front-ui
-    build:
-      context: .
-      dockerfile: bank-front-ui/Dockerfile
-    ports:
-      - "8083:8083"
-    environment:
-      SPRING_PROFILES_ACTIVE: default
-      KEYCLOAK_FRONT_CLIENT_SECRET: ${KEYCLOAK_FRONT_CLIENT_SECRET}
-    depends_on:
-      keycloak:
-        condition: service_healthy
-    networks:
-      - bank-network
-
-  bank-cash:
-    container_name: bank-cash
-    build:
-      context: .
-      dockerfile: bank-cash/Dockerfile
-    ports:
-      - "8089:8089"
-    environment:
-      SPRING_PROFILES_ACTIVE: default
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      accounts-service:
-        condition: service_started
-    networks:
-      - bank-network
-
-  bank-transfer:
-    container_name: bank-transfer
-    build:
-      context: .
-      dockerfile: bank-transfer/Dockerfile
-    ports:
-      - "8090:8090"
-    environment:
-      SPRING_PROFILES_ACTIVE: default
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-      accounts-service:
-        condition: service_started
-    networks:
-      - bank-network
-
-  bank-blocker:
-    container_name: bank-blocker
-    build:
-      context: .
-      dockerfile: bank-blocker/Dockerfile
-    ports:
-      - "8091:8091"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - bank-network
+      - postgres_network
+    command:
+      - start-dev --import-realm
 
 networks:
-  bank-network:
-    driver: bridge
+  postgres_network:

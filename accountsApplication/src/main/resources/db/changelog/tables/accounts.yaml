@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: yaBank tables notification
+      changes:
+        - createTable:
+            schemaName: account
+            tableName: accounts
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: number
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: varchar(3)
+                  constraints:
+                    nullable: false
+                  remarks: USD, EUR, RUB
+              - column:
+                  name: balance
+                  type: decimal(19, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: datetime_create
+                  type: timestamp
+                  constraints:
+                    nullable: false
