@@ -1,6 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: yaBank tables exchange
+      author: minlex
       changes:
         - createTable:
             schemaName: exchange

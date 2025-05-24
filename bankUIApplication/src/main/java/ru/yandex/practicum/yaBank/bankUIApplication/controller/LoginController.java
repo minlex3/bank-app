@@ -27,7 +27,7 @@ public class LoginController {
 
     @GetMapping("/login")
     public String showLoginPage() {
-        return "login"; // Возвращает шаблон login.html
+        return "login";
     }
 
     @GetMapping("/logout")
@@ -50,7 +50,7 @@ public class LoginController {
 
     @GetMapping("/signup")
     public String showSignupPage() {
-        return "signup"; // Возвращает шаблон login.html
+        return "signup";
     }
 
     @PostMapping("/signup")
