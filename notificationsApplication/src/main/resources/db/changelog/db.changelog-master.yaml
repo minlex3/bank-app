@@ -1,6 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create-notification-schema
+      author: minlex
       changes:
         - sql:
             sql: "CREATE SCHEMA IF NOT EXISTS notification;"

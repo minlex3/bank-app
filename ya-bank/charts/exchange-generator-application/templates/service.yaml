@@ -1,0 +1,13 @@
+{{- $fullName := include "exchange-generator-application.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+spec:
+  selector:
+    app: {{ $fullName }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      name: http

@@ -1,6 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: yaBank tables notification
+      author: minlex
       changes:
         - createTable:
             schemaName: account
