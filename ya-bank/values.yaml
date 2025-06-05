@@ -1,0 +1,317 @@
+# Global values (if any)
+global:
+  domain: yabank.local # Example domain for ingress
+
+exchange-application:
+  replicaCount: 1
+  image:
+    repository: exchange-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8087
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /exchangeApplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  config:
+    database_url: "jdbc:postgresql://yabank-db.{{ .Release.Namespace }}.svc.cluster.local:5432/yabank"
+    database_username: "yabank"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+blocker-application:
+  replicaCount: 1
+  image:
+    repository: blocker-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8085
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /blockerapplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  config:
+    database_url: "jdbc:postgresql://yabank-db.{{ .Release.Namespace }}.svc.cluster.local:5432/yabank"
+    database_username: "yabank"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+exchange-generator-application:
+  replicaCount: 1
+  image:
+    repository: exchange-generator-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8091
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  ingress:
+    enabled: false
+    className: "nginx"
+    annotations: {}
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: [ ]
+  gateway:
+    service_url: "http://gateway-ingress.yabank.local"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+notifications-application:
+  replicaCount: 1
+  image:
+    repository: notifications-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8081
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /notificationsapplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  config:
+    database_url: "jdbc:postgresql://yabank-db.{{ .Release.Namespace }}.svc.cluster.local:5432/yabank"
+    database_username: "yabank"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+accounts-application:
+  replicaCount: 1
+  image:
+    repository: accounts-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8083
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /accountsapplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  config:
+    database_url: "jdbc:postgresql://yabank-db.{{ .Release.Namespace }}.svc.cluster.local:5432/yabank"
+    database_username: "yabank"
+  gateway:
+    service_url: "http://gateway-ingress.yabank.local"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+cash-application:
+  replicaCount: 1
+  image:
+    repository: cash-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8092
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /cashApplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  gateway:
+    service_url: "http://gateway-ingress.yabank.local"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+transfer-application:
+  replicaCount: 1
+  image:
+    repository: transfer-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8093
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+    hosts:
+      - host: gateway-ingress.yabank.local
+        paths:
+          - path: /transferApplication(/|$)(.*)
+            pathType: ImplementationSpecific
+    tls: [ ]
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  gateway:
+    service_url: "http://gateway-ingress.yabank.local"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+bank-ui-application:
+  replicaCount: 1
+  image:
+    repository: bank-ui-application
+    tag: "0.0.1-SNAPSHOT"
+    pullPolicy: IfNotPresent
+    # -----------------------------
+  service:
+    type: ClusterIP
+    port: 8080
+  keycloak:
+    issuer_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank"
+    token_uri: "http://yabank-keycloak.{{ .Release.Namespace }}.svc.cluster.local:8080/realms/yabank/protocol/openid-connect/token"
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+    hosts:
+      - host: bank.yabank.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: [ ]
+  gateway:
+    service_url: "http://gateway-ingress.yabank.local"
+  resources:
+    limits:
+      memory: "1Gi"
+    requests:
+      memory: "512Mi"
+
+db:
+  enabled: true
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "12345" # Можно оставить пустым для генерации
+    database: yabank
+    username: yabank
+    password: "123456" # Example: Not recommended for production
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi # Small size for example
+    pgHbaConfiguration: |
+      # Локальные соединения без пароля - для тестирования, не для прода
+      local   all             all                                     trust
+      host    replication     all                   127.0.0.1/32    md5
+      host    replication     all                   ::1/128         md5
+      host    all             all                   0.0.0.0/0       md5
+      host    all             all                   ::/0            md5
+
+keycloak:
+  enabled: true
+  auth:
+    adminUser: admin
+    adminPassword: adminpassword
+  httpRelativePath: "/"
+  hostname: localhost
+  production: false
+  tls:
+    enabled: false
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+  extraArgs:
+    - --import-realm
+  extraVolumes:
+    - name: realm-config
+      configMap:
+        name: keycloak-realm-config
+  extraVolumeMounts:
+    - name: realm-config
+      mountPath: /opt/bitnami/keycloak/data/import
+  extraEnvVars:
+    - name: KEYCLOAK_EXTRA_ARGS
+      value: --import-realm
