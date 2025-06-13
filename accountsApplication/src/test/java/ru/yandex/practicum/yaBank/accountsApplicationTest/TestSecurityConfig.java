@@ -1,6 +1,11 @@
 package ru.yandex.practicum.yaBank.accountsApplicationTest;
 
 import com.netflix.discovery.EurekaClient;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Printed;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -38,6 +43,18 @@ public class TestSecurityConfig {
     @Bean
     public EurekaClient eurekaClient() {
         return mock(EurekaClient.class);
+    }
+
+    @Bean
+    public StreamsBuilder streamsBuilder() {
+        return new StreamsBuilder();
+    }
+
+    @Bean
+    public KStream<String, String> printingKStream(StreamsBuilder streamsBuilder) {
+        var inputStream = streamsBuilder.stream("notifications", Consumed.with(Serdes.String(), Serdes.String() ));
+        inputStream.print(Printed.toSysOut());
+        return inputStream;
     }
 
 }

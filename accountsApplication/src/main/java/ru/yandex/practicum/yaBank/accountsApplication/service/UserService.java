@@ -1,5 +1,6 @@
 package ru.yandex.practicum.yaBank.accountsApplication.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.yaBank.accountsApplication.dto.ChangePasswordRequestDto;
@@ -18,16 +19,20 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     @Autowired
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
 
     @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
     @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
+
+    @Autowired
+    private final NotificationProducer notificationProducer;
 
     public UserResponseDto findByUsername(String login) {
         return usersRepository.findUserByLogin(login)
@@ -54,35 +59,35 @@ public class UserService {
         }
         user.setDatetimeCreate(LocalDateTime.now());
         User savedUser = usersRepository.save(user);
-        Long userId=savedUser.getId();
-        notificationService.sendNotification(userRequestDto.getEmail(),"Новый пользователь успешно зарегистрирован");
+        Long userId = savedUser.getId();
+        notificationService.sendNotification(userRequestDto.getEmail(), "Новый пользователь успешно зарегистрирован");
         return userId;
     }
 
-    public void chengePassword(ChangePasswordRequestDto changePasswordRequestDto) {
+    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
 
         var foundUser = usersRepository.findUserByLogin(changePasswordRequestDto.getLogin());
-        if (!foundUser.isPresent()) {
+        if (foundUser.isEmpty()) {
             throw new RuntimeException("Пользователь с логином " + changePasswordRequestDto.getLogin() + " не зарегистрирован");
         }
         User user = foundUser.get();
         user.setPassword(changePasswordRequestDto.getPassword());
         usersRepository.save(user);
-        notificationService.sendNotification(user.getEmail(),"Пароль пользователя успешно изменен");
+        notificationService.sendNotification(user.getEmail(), "Пароль пользователя успешно изменен");
     }
 
     public Long editUser(UserRequestDto userRequestDto) {
         validateUser(userRequestDto);
 
         var foundUser = usersRepository.findUserByLogin(userRequestDto.getLogin());
-        if (!foundUser.isPresent()) {
+        if (foundUser.isEmpty()) {
             throw new RuntimeException("Пользователь с логином " + userRequestDto.getLogin() + " не зарегистрирован");
         }
         User user = foundUser.get();
         user.setFio(userRequestDto.getFio());
-        user.setDateOfBirth(LocalDate.parse(userRequestDto.getDateOfBirth(),DateTimeUtils.DATE_TIME_FORMATTER));
+        user.setDateOfBirth(LocalDate.parse(userRequestDto.getDateOfBirth(), DateTimeUtils.DATE_TIME_FORMATTER));
         User savedUser = usersRepository.save(user);
-        notificationService.sendNotification(user.getEmail(),"Пользователь успешно отредактирован");
+        notificationService.sendNotification(user.getEmail(), "Пользователь успешно отредактирован");
         return savedUser.getId();
     }
 
@@ -97,7 +102,7 @@ public class UserService {
         Optional.ofNullable(userRequestDto.getDateOfBirth())
                 .orElseThrow(() -> new IllegalArgumentException("Не передана дата рождения клиента"));
 
-        LocalDate dateOfBirth = null;
+        LocalDate dateOfBirth;
         try {
             dateOfBirth = LocalDate.parse(userRequestDto.getDateOfBirth(), DateTimeUtils.DATE_TIME_FORMATTER);
         } catch (Exception e) {
