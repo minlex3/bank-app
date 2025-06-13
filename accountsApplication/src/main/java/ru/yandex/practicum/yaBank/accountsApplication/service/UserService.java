@@ -29,9 +29,6 @@ public class UserService {
     private final UserMapper userMapper;
 
     @Autowired
-    private final NotificationService notificationService;
-
-    @Autowired
     private final NotificationProducer notificationProducer;
 
     public UserResponseDto findByUsername(String login) {
@@ -60,7 +57,7 @@ public class UserService {
         user.setDatetimeCreate(LocalDateTime.now());
         User savedUser = usersRepository.save(user);
         Long userId = savedUser.getId();
-        notificationService.sendNotification(userRequestDto.getEmail(), "Новый пользователь успешно зарегистрирован");
+        notificationProducer.sendNotification(userRequestDto.getEmail(), "Новый пользователь успешно зарегистрирован");
         return userId;
     }
 
@@ -73,7 +70,7 @@ public class UserService {
         User user = foundUser.get();
         user.setPassword(changePasswordRequestDto.getPassword());
         usersRepository.save(user);
-        notificationService.sendNotification(user.getEmail(), "Пароль пользователя успешно изменен");
+        notificationProducer.sendNotification(user.getEmail(), "Пароль пользователя успешно изменен");
     }
 
     public Long editUser(UserRequestDto userRequestDto) {
@@ -87,7 +84,7 @@ public class UserService {
         user.setFio(userRequestDto.getFio());
         user.setDateOfBirth(LocalDate.parse(userRequestDto.getDateOfBirth(), DateTimeUtils.DATE_TIME_FORMATTER));
         User savedUser = usersRepository.save(user);
-        notificationService.sendNotification(user.getEmail(), "Пользователь успешно отредактирован");
+        notificationProducer.sendNotification(user.getEmail(), "Пользователь успешно отредактирован");
         return savedUser.getId();
     }
 

@@ -29,9 +29,6 @@ public class AccountsService {
     private final AccountsRepository accountsRepository;
 
     @Autowired
-    private final NotificationService notificationService;
-
-    @Autowired
     private final NotificationProducer notificationProducer;
 
     @Autowired
@@ -61,7 +58,7 @@ public class AccountsService {
         account.setUser(user);
         Account savedAccount = accountsRepository.save(account);
 
-        notificationService.sendNotification(user.getEmail(), "Новый счет у пользователя успешно зарегистрирован");
+        notificationProducer.sendNotification(user.getEmail(), "Новый счет у пользователя успешно зарегистрирован");
         return savedAccount.getId();
     }
 
