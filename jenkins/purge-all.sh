@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # Предупреждение
-echo -e "\033[1;31m⚠️  WARNING: This script will DESTROY ALL Jenkins and application data!\033[0m"
-echo -e "\033[1;33mThis includes:\n- All Helm releases\n- Kubernetes namespaces (test/prod)\n- Docker containers and volumes\n- Jenkins data\033[0m"
+echo -e "\033[1;31m⚠️  WARNING: This script will DESTROY ALL Jenkins, Kafka and application data!\033[0m"
+echo -e "\033[1;33mThis includes:\n- All Helm releases and Kafka\n- Kubernetes namespaces (test/prod)\n- Docker containers and volumes\n- Jenkins data\033[0m"
 read -r -p "Are you absolutely sure? (type 'yes' to confirm): " answer
 if [ "$answer" != "yes" ]; then
     echo "Aborted."
@@ -53,6 +53,7 @@ releases=(
     "bank-ui-application"
     "db"
     "keycloak"
+    "kafka"
 )
 
 for ns in test prod; do
@@ -62,7 +63,7 @@ for ns in test prod; do
     done
 
     # Удаление секретов
-    secrets=("yabank-db" "yabank-keycloak" "yabank-postgresql")
+    secrets=("yabank-db" "yabank-keycloak" "yabank-postgresql" "yabank-kafka")
     for secret in "${secrets[@]}"; do
         if kubectl get secret "$secret" -n "$ns" &>/dev/null; then
             echo "Deleting secret $secret from $ns..."

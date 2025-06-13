@@ -1,40 +1,41 @@
-package ru.yandex.practicum.yaBank.exchangeGeneratorApplication.service;
+package ru.yandex.practicum.yaBank.exchangeGeneratorApplicationTest.service;
 
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import ru.yandex.practicum.yaBank.exchangeGeneratorApplication.ExchangeGeneratorApplication;
 import ru.yandex.practicum.yaBank.exchangeGeneratorApplication.dto.CurrencyRateDto;
-import ru.yandex.practicum.yaBank.exchangeGeneratorApplication.dto.HttpResponseDto;
+import ru.yandex.practicum.yaBank.exchangeGeneratorApplicationTest.TestSecurityConfig;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
-public class RatesGenerationService {
-
-    private static final Logger log = LoggerFactory.getLogger(RatesGenerationService.class);
-
-    @Autowired
-    private final ExchangeProducer exchangeProducer;
+@SpringBootTest(classes = {ExchangeGeneratorApplication.class, TestSecurityConfig.class})
+@TestPropertySource(locations = "classpath:application.yml")
+@ActiveProfiles("test")
+@EmbeddedKafka(topics = {"exchange"})
+public class KafkaProducerTest {
 
     private static final Random random = new Random();
 
-    @Scheduled(fixedRate = 10000)
-    public void generateRates() {
+    @Autowired
+    private KafkaTemplate<String, List<CurrencyRateDto>> kafkaTemplate;
+
+    @Test
+    public void testProcessor(){
         List<CurrencyRateDto> currencyRateDtos = generateRandomRates();
-        HttpResponseDto response = exchangeProducer.sendRates(currencyRateDtos);
-        if (response != null) {
-            log.info("Результат отправки " + response.getStatusCode() + " " + response.getStatusMessage());
-        } else {
-            log.info("Результат отправки null");
-        }
+
+        String key = UUID.randomUUID().toString();
+        kafkaTemplate.send("exchange", key, currencyRateDtos);
+
     }
 
     private List<CurrencyRateDto> generateRandomRates() {
@@ -68,4 +69,5 @@ public class RatesGenerationService {
                 .sale(roundedSale.doubleValue())
                 .build();
     }
+
 }
