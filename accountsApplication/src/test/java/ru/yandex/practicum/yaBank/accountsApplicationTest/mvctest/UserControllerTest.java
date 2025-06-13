@@ -17,7 +17,6 @@ import ru.yandex.practicum.yaBank.accountsApplication.dto.ChangePasswordRequestD
 import ru.yandex.practicum.yaBank.accountsApplication.dto.UserListResponseDto;
 import ru.yandex.practicum.yaBank.accountsApplication.dto.UserRequestDto;
 import ru.yandex.practicum.yaBank.accountsApplication.dto.UserResponseDto;
-import ru.yandex.practicum.yaBank.accountsApplication.service.AccountsService;
 import ru.yandex.practicum.yaBank.accountsApplication.service.UserService;
 import ru.yandex.practicum.yaBank.accountsApplicationTest.TestSecurityConfig;
 
@@ -63,7 +62,7 @@ public class UserControllerTest {
     @WithMockUser(authorities = "SCOPE_accounts.write")
     void testChangePassword() throws Exception {
         ChangePasswordRequestDto request = new ChangePasswordRequestDto("user1", "newPassword123");
-        doNothing().when(userService).chengePassword(request);
+        doNothing().when(userService).changePassword(request);
 
         mockMvc.perform(post("/user/changepassword")
                         .contentType(MediaType.APPLICATION_JSON)

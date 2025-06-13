@@ -18,7 +18,7 @@ import ru.yandex.practicum.yaBank.accountsApplication.entities.User;
 import ru.yandex.practicum.yaBank.accountsApplication.repository.AccountsRepository;
 import ru.yandex.practicum.yaBank.accountsApplication.repository.UsersRepository;
 import ru.yandex.practicum.yaBank.accountsApplication.service.AccountsService;
-import ru.yandex.practicum.yaBank.accountsApplication.service.NotificationService;
+import ru.yandex.practicum.yaBank.accountsApplication.service.NotificationProducer;
 import ru.yandex.practicum.yaBank.accountsApplicationTest.TestSecurityConfig;
 
 import java.math.BigDecimal;
@@ -28,9 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(classes = {AccountsApplication.class, TestSecurityConfig.class})
 @TestPropertySource(locations = "classpath:application.yml")
@@ -47,7 +45,7 @@ public class AccountsServiceTest {
     private AccountsRepository accountsRepository;
 
     @MockitoBean(reset = MockReset.BEFORE)
-    private NotificationService notificationService;
+    private NotificationProducer notificationProducer;
 
     private User user;
 
@@ -76,16 +74,16 @@ public class AccountsServiceTest {
                 .statusMessage("OK")
                 .build();
 
-        when(notificationService.sendNotification(anyString(),anyString())).thenReturn(mockResponse);
+        when(notificationProducer.sendNotification(anyString(), anyString())).thenReturn(mockResponse);
         Long accountId = accountsService.addAccount(request);
 
         assertNotNull(accountId);
         List<Account> accounts = accountsRepository.findAllByUser(user);
         assertEquals(1, accounts.size());
-        assertEquals("USD", accounts.get(0).getCurrency());
-        assertEquals(0, accounts.get(0).getBalance().doubleValue());
+        assertEquals("USD", accounts.getFirst().getCurrency());
+        assertEquals(0, accounts.getFirst().getBalance().doubleValue());
 
-        verify(notificationService, times(1)).sendNotification(anyString(),anyString());
+        verify(notificationProducer, times(1)).sendNotification(anyString(), anyString());
     }
 
     @Test
@@ -104,7 +102,7 @@ public class AccountsServiceTest {
 
         List<Account> accounts = accountsRepository.findAllByUser(user);
         assertEquals(1, accounts.size());
-        assertEquals(100, accounts.get(0).getBalance().doubleValue());
+        assertEquals(100, accounts.getFirst().getBalance().doubleValue());
     }
 
     @Test

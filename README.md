@@ -32,22 +32,24 @@
 - Орекстрация: Docker Compose
 - Авторизация: OAuth 2.0
 - CI/CD: Jenkins
+- Очередь для взаимодействия сервисов: Kafka
 
 #### Запуск приложения:
 
 1. Клонирование репозитория в выбранную директорию
 2. Сборка приложения командой `gradle build`
 3. Запуск Minikube `minikube start`
-4. Запуск окружения для Minikube `minikube docker-env >minikube-docker-env.sh`
+4. При локальном запуске необходимо прописать DNS для Kafka `127.0.0.1 test.kafka.ru`
+5. Запуск окружения для Minikube `minikube docker-env >minikube-docker-env.sh`
    (Возможно потребуется выставить права для файла `chmod +x minikube-docker-env.sh`)
-5. Получение bitnamicharts
+6. Получение bitnamicharts
 
 ```bash
   helm pull oci://registry-1.docker.io/bitnamicharts/keycloak --version 24.7.3
    helm pull oci://registry-1.docker.io/bitnamicharts/postgresql --version 14.2.3
    ```
 
-6. Сборка Docker-образов
+7. Сборка Docker-образов
 
 ```bash 
    docker images
@@ -62,7 +64,7 @@
    docker build -t bank-ui-application:0.0.1-SNAPSHOT ./bankUIApplication
 ```
 
-7. Запуск helm
+8. Запуск helm
    ```bash
    helm dependency update .
    helm install yabank ./

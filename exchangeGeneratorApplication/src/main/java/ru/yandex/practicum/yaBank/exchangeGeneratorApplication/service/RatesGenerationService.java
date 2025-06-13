@@ -1,5 +1,8 @@
 package ru.yandex.practicum.yaBank.exchangeGeneratorApplication.service;
 
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,17 +16,25 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 public class RatesGenerationService {
 
+    private static final Logger log = LoggerFactory.getLogger(RatesGenerationService.class);
+
     @Autowired
-    private ExchangeApplicationService exchangeApplicationService;
+    private final ExchangeProducer exchangeProducer;
 
     private static final Random random = new Random();
 
     @Scheduled(fixedRate = 10000)
     public void generateRates() {
         List<CurrencyRateDto> currencyRateDtos = generateRandomRates();
-        HttpResponseDto response = exchangeApplicationService.sendRates(currencyRateDtos);
+        HttpResponseDto response = exchangeProducer.sendRates(currencyRateDtos);
+        if (response != null) {
+            log.info("Результат отправки " + response.getStatusCode() + " " + response.getStatusMessage());
+        } else {
+            log.info("Результат отправки null");
+        }
     }
 
     private List<CurrencyRateDto> generateRandomRates() {

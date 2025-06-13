@@ -25,6 +25,16 @@ spring:
         provider:
           keycloak:
             token-uri: ${KEYCLOAK_TOKEN_URL}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: all
+    admin:
+      client-id: yandex-practicum
+    properties:
+      security.protocol: PLAINTEXT
 server:
   port: ${ACCOUNTS_SERVER_PORT}
 eureka:

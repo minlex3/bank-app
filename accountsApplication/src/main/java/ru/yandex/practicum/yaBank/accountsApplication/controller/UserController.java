@@ -42,7 +42,7 @@ public class UserController {
     @Secured("SCOPE_accounts.write")
     @ResponseStatus(HttpStatus.OK)
     public HttpResponseDto chengePassword(@RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
-        userService.chengePassword(changePasswordRequestDto);
+        userService.changePassword(changePasswordRequestDto);
         return HttpResponseDto.builder()
                 .statusMessage("Chenge Password User OK")
                 .statusCode("0")

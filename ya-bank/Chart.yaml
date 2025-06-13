@@ -2,7 +2,7 @@ apiVersion: v2
 name: ya-bank
 version: 0.1.0
 appVersion: "0.1.0"
-description: Helm чарт для bank-app
+description: Зонтичный Helm чарт для yaBank
 type: application
 dependencies:
   - name: exchange-generator-application
@@ -11,7 +11,7 @@ dependencies:
   - name: notifications-application
     version: "0.1.0"
     repository: "file://./charts/notifications-application"
-  - name: postgresql
+  - name: postgresql   # Одну БД на все сервисы для экономии ресурсов компьютера
     version: "14.2.3"
     repository: "https://charts.bitnami.com/bitnami"
     alias: db
@@ -39,3 +39,8 @@ dependencies:
   - name: bank-ui-application
     version: "0.1.0"
     repository: "file://./charts/bank-ui-application"
+  - name: kafka
+    version: "27.1.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    alias: kafka
+    condition: kafka.enabled

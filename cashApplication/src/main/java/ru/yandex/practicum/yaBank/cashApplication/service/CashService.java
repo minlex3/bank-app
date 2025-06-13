@@ -1,5 +1,6 @@
 package ru.yandex.practicum.yaBank.cashApplication.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.yaBank.cashApplication.dto.AccountOperationDto;
@@ -7,16 +8,17 @@ import ru.yandex.practicum.yaBank.cashApplication.dto.BlockerDto;
 import ru.yandex.practicum.yaBank.cashApplication.dto.HttpResponseDto;
 
 @Service
+@RequiredArgsConstructor
 public class CashService {
 
     @Autowired
-    private AccountApplicationService accountApplicationService;
+    private final AccountApplicationService accountApplicationService;
 
     @Autowired
-    private BlockerApplicationService blockerApplicationService;
+    private final BlockerApplicationService blockerApplicationService;
 
     @Autowired
-    private NotificationService notificationService;
+    private final NotificationProducer notificationProducer;
 
 
     public void cashIn(AccountOperationDto accountOperationDto) {
@@ -39,7 +41,7 @@ public class CashService {
 
         String email = accountOperationDto.getLogin();
         String message = "Ваш счет пополнен на " + accountOperationDto.getAmount() + " " + accountOperationDto.getCurrency();
-        notificationService.sendNotification(email, message);
+        notificationProducer.sendNotification(email, message);
     }
 
     public void cashOut(AccountOperationDto accountOperationDto) {
@@ -62,6 +64,6 @@ public class CashService {
 
         String email = accountOperationDto.getLogin();
         String message = "С вашего счета выполнено списание на " + accountOperationDto.getAmount() + " " + accountOperationDto.getCurrency();
-        notificationService.sendNotification(email, message);
+        notificationProducer.sendNotification(email, message);
     }
 }
